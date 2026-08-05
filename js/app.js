@@ -115,6 +115,12 @@ const App = {
     renderResult(result, placeholder) {
         const fmt = ImageCompressor.formatSize;
         placeholder.className = 'result-item';
+        const badgeHtml = result.skipped
+            ? '<span class="saved-badge neutral">已是最优</span>'
+            : `<span class="saved-badge positive">↓ ${result.savedPercent}%</span>`;
+        const hintHtml = result.skipped
+            ? '<div class="result-hint">原图已是最优，无需压缩，已保留原文件</div>'
+            : '';
         placeholder.innerHTML = `
             <div class="result-preview">
                 <img src="${result.url}" alt="${result.name}">
@@ -123,13 +129,12 @@ const App = {
                 <span class="result-name">${result.name}</span>
                 <div class="result-stats">
                     <span>${fmt(result.original.size)} → <strong>${fmt(result.compressed.size)}</strong></span>
-                    <span class="saved-badge ${result.savedPercent > 0 ? 'positive' : 'negative'}">
-                        ${result.savedPercent > 0 ? '↓' : '↑'} ${Math.abs(result.savedPercent)}%
-                    </span>
+                    ${badgeHtml}
                 </div>
                 <div class="result-dims">
                     ${result.original.width}×${result.original.height} → ${result.compressed.width}×${result.compressed.height}
                 </div>
+                ${hintHtml}
             </div>
             <a class="btn btn-primary btn-sm" href="${result.url}" download="${result.name}">下载</a>
         `;
@@ -144,15 +149,16 @@ const App = {
         if (this.results.length === 0) return;
         const totalOriginal = this.results.reduce((s, r) => s + r.original.size, 0);
         const totalCompressed = this.results.reduce((s, r) => s + r.compressed.size, 0);
-        const saved = Math.max(0, Math.round((1 - totalCompressed / totalOriginal) * 100));
+        const skippedCount = this.results.filter((r) => r.skipped).length;
+        const saved = Math.round((1 - totalCompressed / totalOriginal) * 100);
         const fmt = ImageCompressor.formatSize;
+        const badgeClass = saved > 0 ? 'positive' : 'neutral';
+        const badgeText = saved > 0 ? `总共减少 ${saved}%` : '已是最优，无需压缩';
 
         this.resultsSummary.innerHTML = `
-            <span>共 ${this.results.length} 张图片</span>
+            <span>共 ${this.results.length} 张图片${skippedCount > 0 ? `（${skippedCount} 张保留原图）` : ''}</span>
             <span>${fmt(totalOriginal)} → <strong>${fmt(totalCompressed)}</strong></span>
-            <span class="saved-badge ${saved > 0 ? 'positive' : 'negative'}">
-                总共 ${saved > 0 ? '减少' : '增加'} ${Math.abs(saved)}%
-            </span>
+            <span class="saved-badge ${badgeClass}">${badgeText}</span>
         `;
     },
 
