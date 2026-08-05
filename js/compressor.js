@@ -37,28 +37,44 @@ const ImageCompressor = {
         canvas.height = dimensions.height;
         const ctx = canvas.getContext('2d');
 
-        if (format === 'image/jpeg' || (format === 'auto' && file.type === 'image/jpeg')) {
+        const outputFormat = format === 'auto' ? file.type : format;
+
+        // JPEG 不支持透明通道，需要先填充白色背景；
+        // 透明 PNG 转 WebP 时也补白，避免出现黑色背景。
+        if (outputFormat === 'image/jpeg' || (outputFormat === 'image/webp' && file.type === 'image/png')) {
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        const outputFormat = format === 'auto' ? file.type : format;
-        const blob = await this.canvasToBlob(canvas, outputFormat, quality);
+        const compressedBlob = await this.canvasToBlob(canvas, outputFormat, quality);
+
+        // 关键修复：当压缩结果反而比原图更大时（常见于 PNG 等无损格式
+        // 被 Canvas 重新编码），直接保留原图，避免“压缩后变大”的问题。
+        let blob = compressedBlob;
+        let outputSize = compressedBlob.size;
+        let skipped = false;
+
+        if (compressedBlob.size >= file.size) {
+            blob = file;
+            outputSize = file.size;
+            skipped = true;
+        }
 
         return {
             blob,
             url: URL.createObjectURL(blob),
-            name: this.getOutputName(file.name, outputFormat),
+            name: skipped ? file.name : this.getOutputName(file.name, outputFormat),
             original,
             compressed: {
-                width: canvas.width,
-                height: canvas.height,
-                size: blob.size,
-                type: outputFormat,
+                width: skipped ? original.width : canvas.width,
+                height: skipped ? original.height : canvas.height,
+                size: outputSize,
+                type: skipped ? original.type : outputFormat,
             },
-            savedPercent: Math.max(0, Math.round((1 - blob.size / file.size) * 100)),
+            savedPercent: skipped ? 0 : Math.round((1 - outputSize / file.size) * 100),
+            skipped,
         };
     },
 
