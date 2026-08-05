@@ -119,7 +119,7 @@ const App = {
             ? '<span class="saved-badge neutral">已是最优</span>'
             : `<span class="saved-badge positive">↓ ${result.savedPercent}%</span>`;
         const hintHtml = result.skipped
-            ? '<div class="result-hint">原图已是最优，无需压缩，已保留原文件</div>'
+            ? '<div class="result-hint">原图已是最优，无需压缩，已保留原文件。请尝试调整图片尺寸（开启「调整尺寸」并设置最大宽/高），通常可进一步减小体积。</div>'
             : '';
         placeholder.innerHTML = `
             <div class="result-preview">
