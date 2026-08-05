@@ -1,0 +1,16 @@
+{
+  "name": "haai",
+  "version": "1.0.0",
+  "description": "在线图片压缩与尺寸调整工具，部署在 Cloudflare Pages 上。所有图片处理均在浏览器本地完成，**图片不上传服务器**，隐私安全。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-cloudfront": "^3.1102.0",
+    "@aws-sdk/client-s3": "^3.1102.0"
+  }
+}
