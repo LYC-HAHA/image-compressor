@@ -154,6 +154,8 @@ main { flex: 1; padding: 32px 0; }
 }
 .saved-badge.positive { background: #dcfce7; color: var(--success); }
 .saved-badge.negative { background: #fee2e2; color: var(--danger); }
+.saved-badge.neutral { background: #e2e8f0; color: var(--text-light); }
+.result-hint { font-size: 12px; color: var(--text-light); margin-top: 4px; }
 
 /* Footer */
 .footer { background: var(--card); border-top: 1px solid var(--border); padding: 20px 0; text-align: center; }
